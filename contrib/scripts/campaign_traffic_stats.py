@@ -18,8 +18,8 @@ from typing import Any, Iterable, Optional, Sequence
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CAMPAIGN_DIR = REPO_ROOT / "experiments" / "60att_5runs_l0l1l2l3"
-DEFAULT_FIGSHARE_CAMPAIGN_DIR = REPO_ROOT / "downloads" / "figshare" / "extracted" / "60att_5runs_l0l1l2l3"
+DEFAULT_CAMPAIGN_DIR = REPO_ROOT / "experiments" / "all_5runs_4levels"
+DEFAULT_FIGSHARE_CAMPAIGN_DIR = REPO_ROOT / "downloads" / "figshare" / "extracted" / "all_5runs_4levels"
 DEFAULT_REPORTS_ROOT = REPO_ROOT / "contrib" / "reports"
 
 TSHARK_FIELDS = (
@@ -254,7 +254,7 @@ def resolve_campaign_dir(requested: Optional[Path]) -> Path:
     for root in (DEFAULT_FIGSHARE_CAMPAIGN_DIR.parent, DEFAULT_CAMPAIGN_DIR.parent):
         if not root.is_dir():
             continue
-        for candidate in sorted(root.rglob("60att_5runs_l0l1l2l3")):
+        for candidate in sorted(root.rglob("all_5runs_4levels")):
             if candidate.is_dir() and campaign_has_inputs(candidate):
                 return candidate.resolve()
 
