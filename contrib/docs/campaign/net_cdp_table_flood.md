@@ -51,4 +51,4 @@ No aggregated figure was found in `reports/figs` for this attack.
 ## Sources Used
 
 - Attack catalog: `docker/attackers/cdp-table-flood/attack.yaml`
-- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/60att_5runs_l0l1l2l3/net_cdp_table_flood`.
+- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/all_5runs_4levels/net_cdp_table_flood`.

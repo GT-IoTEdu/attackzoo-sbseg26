@@ -85,4 +85,4 @@ This document summarizes the published campaign execution of attack `exf_dns_tun
 ## Sources Used
 
 - Attack catalog: `docker/attackers/dns-tunneling/attack.yaml`
-- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/60att_5runs_l0l1l2l3/exf_dns_tunneling`.
+- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/all_5runs_4levels/exf_dns_tunneling`.

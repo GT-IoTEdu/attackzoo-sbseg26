@@ -85,4 +85,4 @@ This document summarizes the published campaign execution of attack `web_post_br
 ## Sources Used
 
 - Attack catalog: `docker/attackers/web-post-bruteforce/attack.yaml`
-- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/60att_5runs_l0l1l2l3/web_post_bruteforce`.
+- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/all_5runs_4levels/web_post_bruteforce`.

@@ -85,4 +85,4 @@ This document summarizes the published campaign execution of attack `web_idor_pa
 ## Sources Used
 
 - Attack catalog: `docker/attackers/idor-path-traversal/attack.yaml`
-- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/60att_5runs_l0l1l2l3/web_idor_path_traversal`.
+- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/all_5runs_4levels/web_idor_path_traversal`.

@@ -223,13 +223,13 @@ find_figshare_campaign_dir() {
     local candidate
     local first_existing=""
     local -a candidates=(
-        "${EXTRACT_DIR}/60att_5runs_l0l1l2l3"
-        "experiments/60att_5runs_l0l1l2l3"
+        "${EXTRACT_DIR}/all_5runs_4levels"
+        "experiments/all_5runs_4levels"
     )
 
     while IFS= read -r candidate; do
         candidates+=("${candidate}")
-    done < <(find "${EXTRACT_DIR}" "experiments" -type d -name "60att_5runs_l0l1l2l3" -print 2>/dev/null || true)
+    done < <(find "${EXTRACT_DIR}" "experiments" -type d -name "all_5runs_4levels" -print 2>/dev/null || true)
 
     for candidate in "${candidates[@]}"; do
         [[ -d "${candidate}" ]] || continue
@@ -280,7 +280,7 @@ extract_archive_if_needed() {
     printf '[INFO] Extracting %s under %s...\n' "${archive_path}" "${EXTRACT_DIR}"
     tar -xzf "${archive_path}" -C "${EXTRACT_DIR}"
     find_figshare_campaign_dir
-    [[ -n "${campaign_dir}" && -d "${campaign_dir}" ]] || fail "Directory 60att_5runs_l0l1l2l3 was not found after extraction."
+    [[ -n "${campaign_dir}" && -d "${campaign_dir}" ]] || fail "Directory all_5runs_4levels was not found after extraction."
 }
 
 prepare_figshare_campaign() {

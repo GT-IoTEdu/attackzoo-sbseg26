@@ -371,7 +371,7 @@ Adjust the filesystem-estimated window:
 
 ```bash
 python3 contrib/scripts/campaign_stats.py \
-  --campaign-dir experiments/60att_5runs_l0l1l2l3 \
+  --campaign-dir experiments/all_5runs_4levels \
   --first-attack bf_ssh \
   --last-attack web_xss_scanner
 ```

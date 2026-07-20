@@ -1,6 +1,6 @@
-# Campaign `60att_5runs_l0l1l2l3`
+# Campaign `all_5runs_4levels`
 
-This folder documents the published full campaign `60att_5runs_l0l1l2l3` in one file per attack. The full `experiments/60att_5runs_l0l1l2l3` directory is not versioned in Git because of its size; retrieve and validate the generated dataset CSVs from the Figshare dataset below with `ATTACKZOO_CLAIM3_MODE=figshare bash run_claim3.sh` from the repository root. The Figshare archive does not contain raw PCAP captures. The per-attack pages summarize the published campaign, and the selected figures are copied under `contrib/assets/campaign_doc`.
+This folder documents the published full campaign `all_5runs_4levels` in one file per attack. The full `experiments/all_5runs_4levels` directory is not versioned in Git because of its size; retrieve and validate the generated dataset CSVs from the Figshare dataset below with `ATTACKZOO_CLAIM3_MODE=figshare bash run_claim3.sh` from the repository root. The Figshare archive does not contain raw PCAP captures. The per-attack pages summarize the published campaign, and the selected figures are copied under `contrib/assets/campaign_doc`.
 
 - Documented attacks: **60**
 - Raw PCAP captures in the Figshare archive: **0**

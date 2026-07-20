@@ -85,4 +85,4 @@ This document summarizes the published campaign execution of attack `net_stp_con
 ## Sources Used
 
 - Attack catalog: `docker/attackers/stp-conf-flood/attack.yaml`
-- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/60att_5runs_l0l1l2l3/net_stp_conf_flood`.
+- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/all_5runs_4levels/net_stp_conf_flood`.

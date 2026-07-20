@@ -85,4 +85,4 @@ This document summarizes the published campaign execution of attack `iot_coap_ge
 ## Sources Used
 
 - Attack catalog: `docker/attackers/coap-get-flood/attack.yaml`
-- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/60att_5runs_l0l1l2l3/iot_coap_get_flood`.
+- Full campaign artifacts: available from the Figshare dataset linked in the campaign index; when extracted locally, expected under `experiments/all_5runs_4levels/iot_coap_get_flood`.
