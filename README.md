@@ -108,7 +108,7 @@ Environment used for local validation:
 | Packages | Docker Engine 27.0 or newer and Python 3 |
 | CPU | 4 vCPUs |
 | Memory | 4 GB RAM for reduced tests; 8 GB for full experiment |
-| Storage | 30 GB free for installation and images; 50 GB or more for PCAP captures and repeated experiments |
+| Storage | 30 GB free for installation and images; 50 GB or more for PCAP captures and repeated standalone experiments; 250 GB or more for full Claim 3 reproduction |
 | Network | Isolated environment, preferably a dedicated host or lab environment without direct Internet exposure |
 
 ## Dependencies
