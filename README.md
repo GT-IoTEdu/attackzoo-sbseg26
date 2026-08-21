@@ -86,9 +86,9 @@ The complete catalog coverage, category counts, and MITRE ATT&CK mapping are mai
 >[!NOTE]
 >More details about [Safety and port isolation guidance](#safety-considerations).
 
-### Recommended Execution Environment
+### Execution Environment
 
-Environment used for local validation:
+Environment used by the authors for local validation:
 
 | Resource | Tested configuration |
 | --- | --- |
@@ -99,8 +99,8 @@ Environment used for local validation:
 | Python | Python 3.12.3 with `venv` |
 | Docker | Docker Engine 29.6.1; setup accepts Docker Engine 27.0 or newer |
 
->[!WARNING]
->**Minimum recommended environment for review:**
+
+**Minimum recommended environment for review:**
 
 | Resource | Recommended minimum |
 | --- | --- |
@@ -212,7 +212,7 @@ The steps below assume a **clean Ubuntu 24.04 LTS machine** or an equivalent env
 ### 1. Clone the repository and enters it
 
 ```bash
-git clone git@github.com:GT-IoTEdu/attackzoo-sbseg26.git
+git clone https://github.com/GT-IoTEdu/attackzoo-sbseg26.git
 cd attackzoo-sbseg26
 ```
 
