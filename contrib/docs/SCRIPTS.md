@@ -376,6 +376,29 @@ python3 contrib/scripts/campaign_stats.py \
   --last-attack web_xss_scanner
 ```
 
+## `campaign_manifest.py`
+
+`campaign_manifest.py` audits a campaign without modifying its source artifacts. It resolves artifacts relative to the current campaign directory, so stale absolute repository prefixes stored in `meta.json` do not affect the audit.
+
+The output contains one CSV row per execution and a JSON summary. The fixed split is recorded as `run01`--`run03` for development, `run04` for validation, and `run05` for the protected test set.
+
+Quick inventory using only metadata and file sizes:
+
+```bash
+python3 contrib/scripts/campaign_manifest.py
+```
+
+Complete audit with SHA-256, physical CSV line counts, column counts, and schema hashes:
+
+```bash
+python3 contrib/scripts/campaign_manifest.py \
+  --content full \
+  --workers 8 \
+  --overwrite
+```
+
+By default, outputs are written to `contrib/reports/<campaign-name>/audit/manifest.csv` and `summary.json`. Use `--limit` only for smoke tests; a limited report is explicitly marked as partial.
+
 ## `campaign_traffic_stats.py`
 
 `campaign_traffic_stats.py` aggregates campaign traffic statistics from PCAPs or previously extracted `tshark` feature CSVs. It produces analytical CSVs, a per-PCAP cache, auxiliary tables, a manifest, and PNG figures.
