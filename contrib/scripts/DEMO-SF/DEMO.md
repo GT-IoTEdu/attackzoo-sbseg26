@@ -2,7 +2,7 @@
 
 > Execute somente no laboratório Docker local e a partir da **raiz do repositório**.
 
-## 1. Preparação (executar uma vez antes do evento)
+## 1. Preparação (**executar uma vez antes do evento**)
 
 ```bash
 ./setup.sh dependencies
@@ -19,7 +19,7 @@ Quando o novo prompt aparecer, ainda na raiz do repositório:
 - `newgrp docker` abre uma nova sessão de shell com acesso ao Docker.
 - `redux` constrói **7 imagens de ataque** e **3 servidores-alvo**, inicia os servidores e não constrói clientes benignos.
 
-O primeiro build do perfil `redux` normalmente leva alguns minutos. Faça-o antes da apresentação.
+O primeiro build do perfil `redux` normalmente leva 2-3 minutos. **Faça-o antes da apresentação**.
 
 | Categoria | ID usado no comando | Imagem atacante | Alvo da demonstração |
 | --- | --- | --- | --- |
@@ -35,7 +35,7 @@ Os servidores expõem HTTP em `8080`, SSH em `2222` e MQTT em `1883` no host. Os
 
 ## 2. Preparação do terminal da demonstração
 
-Execute este bloco uma vez ao abrir o terminal:
+Execute este bloco **uma vez** ao abrir o terminal:
 
 ```bash
 source .venv/bin/activate
@@ -55,12 +55,12 @@ O `status` deve mostrar `docker_available=true` e os três servidores devem apar
 
 ## 3. Escolha e execute um ataque
 
-### 1 — Descoberta de hosts por ARP
+### 1 — DoS HTTP
 
-Realiza descoberta de hosts na rede Docker do laboratório.
+Envia 100 requisições HTTP com até 10 requisições simultâneas.
 
 ```bash
-python3 attackzoo.py run recon_arp_scan --target "$DEMO_NET"
+python3 attackzoo.py run dos_http_simple --target "$HTTP_IP" --port 80 --count 100 --concurrency 10 --delay_ms 20
 ```
 
 ### 2 — ARP spoofing
@@ -79,12 +79,12 @@ Executa o Nikto contra o servidor HTTP por até 10 segundos.
 python3 attackzoo.py run web_simple_scanner --target "$HTTP_IP" --port 80 --duration 10
 ```
 
-### 4 — Força bruta SSH
+### 4 — Descoberta de hosts por ARP
 
-Executa tentativas de autenticação contra o servidor SSH por 10 segundos.
+Realiza descoberta de hosts na rede Docker do laboratório.
 
 ```bash
-python3 attackzoo.py run bf_ssh --target "$SSH_IP" --port 22 --duration 10
+python3 attackzoo.py run recon_arp_scan --target "$DEMO_NET"
 ```
 
 ### 5 — Túnel ICMP para SSH
@@ -95,12 +95,12 @@ Simula um túnel para o serviço SSH usando tráfego ICMP por 10 segundos.
 python3 attackzoo.py run exf_icmp_tunnel --target "$SSH_IP" --port 22 --duration 10
 ```
 
-### 6 — DoS HTTP
+### 6 — Força bruta SSH
 
-Envia 100 requisições HTTP com até 10 requisições simultâneas.
+Executa tentativas de autenticação contra o servidor SSH por 10 segundos.
 
 ```bash
-python3 attackzoo.py run dos_http_simple --target "$HTTP_IP" --port 80 --count 100 --concurrency 10 --delay_ms 20
+python3 attackzoo.py run bf_ssh --target "$SSH_IP" --port 22 --duration 10
 ```
 
 ### 7 — Flood de publicação MQTT
