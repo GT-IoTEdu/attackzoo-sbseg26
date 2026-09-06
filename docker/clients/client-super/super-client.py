@@ -244,11 +244,14 @@ def do_sip(ip: str, port: int) -> Tuple[bool, str]:
             pass
 
 def do_coap(ip: str, port: int) -> Tuple[bool, str]:
-    # Resource discovery GET (default: /.well-known/core).
-    url = f"coap://{ip}:{port}/.well-known/core"
-    cmd = ["coap-client", "-m", "get", url]
-    rc, out, err = _run_cmd(cmd)
-    return (rc == 0), (f"coap_rc={rc} err={err[:80]}" if rc != 0 else "coap_ok")
+    # Confirmable GET /sensors with a four-byte token and one Uri-Path option.
+    # A raw minimal request avoids Request-Tag (option 292), unsupported by the
+    # deliberately small CoAP target used by the controlled environment.
+    message_id = secrets.token_bytes(2)
+    token = secrets.token_bytes(4)
+    request = b"\x44\x01" + message_id + token + b"\xb7sensors"
+    ok, info = _udp_probe(ip, port, request)
+    return ok, ("coap_ok_reply" if info == "udp_ok_reply" else info)
 
 def do_mqtt(ip: str, port: int) -> Tuple[bool, str]:
     user, pw = _rand_userpass()
