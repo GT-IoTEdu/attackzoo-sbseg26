@@ -30,6 +30,15 @@ SSH_PASS = "0cGSCgtThAm3bDng8LjIm7t2"
 # perfis de carga legitima (NAO niveis de ataque): nome, count, interval_s
 PROFILES = [("baixo", 4, 5.0), ("medio", 20, 1.0), ("alto", 100, 0.2)]
 
+# Override por servico (B8): servicos de SESSAO autenticada tem carga legitima pesada BAIXA em
+# conexoes novas (clientes reutilizam a sessao). O perfil "alto" uniforme (100/0.2s) e stateless-
+# oriented e gerava FP (ex.: 9907001 no ssh/alto). Para SSH, mantem contagem de conexoes novas
+# abaixo do limiar da regra (20/30s), ordenada e muito abaixo do ataque (95 conexoes). Metrica:
+# nº de conexoes novas por origem na janela. Ver protocolo/criterio_rejeicao_fp_b8.md e B8_RESULTADO.
+PROFILE_OVERRIDE = {
+    "ssh": [("baixo", 3, 6.0), ("medio", 8, 2.5), ("alto", 15, 1.2)],
+}
+
 # por servico: csuper_svc, attack_id REGISTRADO (rotulo transitorio, mesmo servico),
 # server_image, extra args de startup do server (lista), porta interna, bpf, env de credenciais
 SERVICES = {
@@ -142,13 +151,15 @@ def main(argv=None):
     a = ap.parse_args(argv)
 
     svcs = [a.only] if a.only else list(SERVICES)
-    profs = [p for p in PROFILES if (not a.profiles or p[0] in a.profiles.split(","))]
-    total = len(svcs) * len(profs) * a.runs
-    print(f"Campanha benigna: {len(svcs)} servicos x {len(profs)} perfis x {a.runs} reps = {total} casos "
+    wanted = a.profiles.split(",") if a.profiles else None
+    print(f"Campanha benigna: {len(svcs)} servicos x reps={a.runs} "
           f"(out: experiments/{OUT_NAME}/)  {'[DRY-RUN]' if a.dry_run else ''}")
     for svc in svcs:
         cfg = SERVICES[svc]
-        print(f"\n== {svc} (server {cfg['img']}, client-super {cfg['csuper']}:{cfg['port']}) ==")
+        base = PROFILE_OVERRIDE.get(svc, PROFILES)
+        profs = [p for p in base if (not wanted or p[0] in wanted)]
+        ov = " [perfil recalibrado]" if svc in PROFILE_OVERRIDE else ""
+        print(f"\n== {svc} (server {cfg['img']}, client-super {cfg['csuper']}:{cfg['port']}){ov} perfis={[p[0]+f'({p[1]}/{p[2]}s)' for p in profs]} ==")
         ip = start_server(svc, cfg, a.dry_run)
         try:
             if not ip and not a.dry_run:
