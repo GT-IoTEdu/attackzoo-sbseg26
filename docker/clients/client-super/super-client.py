@@ -21,11 +21,32 @@ def _to_int(s: str, name: str) -> int:
     except Exception:
         raise SystemExit(f'Invalid parameter "{name}": {s!r}')
 
+
+def _to_float(s: str, name: str) -> float:
+    s2 = _strip_commas(s)
+    try:
+        return float(s2)
+    except Exception:
+        raise SystemExit(f'Invalid parameter "{name}": {s!r}')
+
 def _rand_userpass() -> Tuple[str, str]:
     # Short random username/password values (benign).
     user = "u" + secrets.token_hex(3)
     pw = "p" + secrets.token_hex(6)
     return user, pw
+
+
+def _creds(service: str) -> Tuple[str, str]:
+    # Credenciais benignas configuraveis por ambiente para servicos autenticados
+    # (SSH/SMB/MQTT): BENIGN_<SERVICE>_USER / BENIGN_<SERVICE>_PASS. Se nao
+    # definidas, mantem o comportamento anterior (usuario/senha aleatorios), que
+    # gera apenas TENTATIVA (sem sessao concluida). Com credenciais validas, a
+    # sessao benigna autentica e conclui (campanha benigna da frente B8).
+    user = os.getenv(f"BENIGN_{service}_USER")
+    pw = os.getenv(f"BENIGN_{service}_PASS")
+    if user and pw:
+        return user, pw
+    return _rand_userpass()
 
 def _run_cmd(cmd: List[str], timeout_s: float = PER_TRY_TIMEOUT_S) -> Tuple[int, str, str]:
     try:
@@ -109,14 +130,14 @@ def do_web(ip: str, port: int) -> Tuple[bool, str]:
     return False, f"curl_rc={rc} err={err[:80]}"
 
 def do_smb(ip: str, port: int) -> Tuple[bool, str]:
-    user, pw = _rand_userpass()
+    user, pw = _creds("SMB")
     # -L lists shares; -t is the internal timeout; subprocess also has a 1s timeout.
     cmd = ["smbclient", "-L", f"//{ip}", "-p", str(port), "-U", f"{user}%{pw}", "-m", "SMB3", "-t", "1"]
     rc, out, err = _run_cmd(cmd)
     return (rc == 0), (f"smbclient_rc={rc} err={err[:80]}" if rc != 0 else "smb_ok")
 
 def do_ssh(ip: str, port: int) -> Tuple[bool, str]:
-    user, pw = _rand_userpass()
+    user, pw = _creds("SSH")
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
@@ -254,7 +275,7 @@ def do_coap(ip: str, port: int) -> Tuple[bool, str]:
     return ok, ("coap_ok_reply" if info == "udp_ok_reply" else info)
 
 def do_mqtt(ip: str, port: int) -> Tuple[bool, str]:
-    user, pw = _rand_userpass()
+    user, pw = _creds("MQTT")
     topic = f"SBSeg26/benign/{secrets.token_hex(3)}"
     payload = secrets.token_hex(8)
     client_id = f"{secrets.token_hex(4)}"
@@ -357,7 +378,7 @@ def main() -> int:
     ip = _strip_commas(sys.argv[2])
     port = _to_int(sys.argv[3], "port")
     count = _to_int(sys.argv[4], "count")
-    interval_s = _to_int(sys.argv[5], "interval_s")
+    interval_s = _to_float(sys.argv[5], "interval_s")
     total_s = _to_int(sys.argv[6], "total_time_s")
 
     if service not in SERVICE_MAP:
