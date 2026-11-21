@@ -145,7 +145,7 @@ Tested package versions on Ubuntu 24.04.4 LTS:
 >[!CAUTION]
 >Please note that **this repository depends** on `Docker Engine` being installed as described in the [official documentation](https://docs.docker.com/engine/install/ubuntu/) and also on the [post-installation instructions for Linux](https://docs.docker.com/engine/install/linux-postinstall). Be advised that installation via `apt install` **might not be compatible**.
 
-The script also adds the current user to the `docker` group, configures capture permissions for `tcpdump`, creates `.venv/`, installs Python dependencies, and installs NTLFlowLyzer Project directly from its GitHub repository at commit `86d0102466ea42ba03ddda5c649ac7e533fb25d9` by default.
+The script also adds the current user to the `docker` group, configures capture permissions for `tcpdump`, creates `.venv/`, installs Python dependencies, and installs NTLFlowLyzer Project directly from its GitHub repository at commit `d99cd5377faaed53b39450ce262652902501188d` by default.
 
 ### Python Dependencies
 
@@ -168,7 +168,7 @@ The validated `.venv` also contains `NTLFlowLyzer==0.1.0`; `setup.sh` installs i
 - The official Docker repository for Ubuntu.
 - Operating-system package indexes.
 - PyPI for Python packages.
-- `https://github.com/ahlashkari/NTLFlowLyzer.git` at commit `86d0102466ea42ba03ddda5c649ac7e533fb25d9`.
+- `https://github.com/ahlashkari/NTLFlowLyzer.git` at commit `d99cd5377faaed53b39450ce262652902501188d`.
 - Base images and packages referenced by Dockerfiles under `docker/`.
 - Dozzle (`docker.io/amir20/dozzle`, pinned by digest) for the optional full-profile container log viewer.
 
