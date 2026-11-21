@@ -106,6 +106,7 @@ The script builds all server, attacker, and client images. It also starts the st
 |---|---|---|---|
 | [`clients/client-random/`](clients/client-random/) | `client-random` | `client-random:latest` | Generate continuous benign noise during experiments by randomly choosing among supported protocol clients. |
 | [`clients/client-super/`](clients/client-super/) | `client-super` | `client-super:latest` | Generate controlled benign traffic with count, interval, and duration defined by parameters. |
+| [`clients/client-xrce-dds/`](clients/client-xrce-dds/) | `client-xrce-dds` | `client-xrce-dds:latest` | Generate legitimate XRCE-DDS traffic (session, entity creation, reliable writes) that the XRCE-DDS attacks can act on. Built and started on demand, not by `build-images.sh` or `clients.sh`. |
 
 From the repository root, use `clients.sh` to control client containers:
 
