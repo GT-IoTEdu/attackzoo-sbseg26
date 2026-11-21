@@ -89,6 +89,7 @@ The script builds all server, attacker, and client images. It also starts the st
 | Directory | ID | Image | Purpose |
 |---|---|---|---|
 | [`servers/coap-server/`](servers/coap-server/) | `coap-server` | `server-coap-server:latest` | Serve as a target for CoAP GET requests, resource discovery, fuzzing, and token collisions. |
+| [`servers/dhcp-server/`](servers/dhcp-server/) | `dhcp-server` | `server-dhcp-server:latest` | Serve as the DHCP server of the local network, the victim of DHCP starvation. |
 | [`servers/http-server/`](servers/http-server/) | `http-server` | `server-http-server:latest` | Provide a vulnerable web application for web attacks, scanners, enumeration, and controlled HTTP DoS. |
 | [`servers/mqtt-broker/`](servers/mqtt-broker/) | `mqtt-broker` | `server-mqtt-broker:latest` | Act as an MQTT broker for publishing, brute force, LWT abuse, and QoS amplification in IoT experiments. |
 | [`servers/smb-server/`](servers/smb-server/) | `smb-server` | `server-smb-server:latest` | Provide an SMB/Samba share for enumeration and benign share-listing traffic. |

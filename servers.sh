@@ -29,6 +29,7 @@ ALL_SERVER_IMAGES=(
     server-zenoh-router
     server-telnet-server
     server-ssl-heartbleed
+    server-dhcp-server
 )
 
 REDUX_SERVER_IMAGES=(
@@ -123,6 +124,9 @@ function START {
     fi
     if PROFILE_INCLUDES server-ssl-heartbleed && [ $( docker ps -a | grep -c 'server-ssl-heartbleed') -eq 0 ]; then
         docker run -d --rm --name server-ssl-heartbleed -p 8443:443 server-ssl-heartbleed:latest
+    fi
+    if PROFILE_INCLUDES server-dhcp-server && [ $( docker ps -a | grep -c 'server-dhcp-server') -eq 0 ]; then
+        docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
     fi
 }
 

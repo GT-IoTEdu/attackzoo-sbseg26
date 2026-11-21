@@ -76,6 +76,9 @@ wait
 docker build --no-cache -t server-ssl-heartbleed -f servers/ssl-heartbleed/Dockerfile .
 docker run -d --rm --name server-ssl-heartbleed -p 8443:443 server-ssl-heartbleed:latest
 wait
+docker build -t server-dhcp-server -f servers/dhcp-server/Dockerfile .
+docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
+wait
 docker build --no-cache -t attack-arp-scan -f attackers/arp-scan/Dockerfile .
 docker build --no-cache -t attack-arp-spoof -f attackers/arp-spoof/Dockerfile .
 docker build -t attack-cdp-table-flood -f attackers/cdp-table-flood/Dockerfile .
