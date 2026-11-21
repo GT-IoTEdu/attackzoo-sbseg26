@@ -7,12 +7,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <signal.h>
 #include <time.h>
 
 #define MAX_PACKET_SIZE 4096
+
+#define Z_MSG_INIT 0x01
+#define Z_MSG_OPEN 0x02
+#define Z_FLAG_A 0x20       /* INIT/OPEN: ack */
+#define Z_FLAG_S 0x40       /* INIT: size params present */
+#define Z_FLAG_T 0x40       /* OPEN: lease in seconds */
+#define Z_PROTO_VERSION 0x09
+#define Z_WHATAMI_CLIENT 0x02
+#define Z_ZID_LEN 16
 
 static volatile int g_running = 1;
 
@@ -28,6 +39,116 @@ typedef enum {
 void signal_handler(int sig) {
     printf("\n[!] Stopping fuzzer...\n");
     g_running = 0;
+}
+
+static int send_all(int sock, const unsigned char *buf, size_t len) {
+    while (len > 0) {
+        ssize_t n = send(sock, buf, len, MSG_NOSIGNAL);
+        if (n <= 0) return -1;
+        buf += n;
+        len -= n;
+    }
+    return 0;
+}
+
+static int recv_all(int sock, unsigned char *buf, size_t len) {
+    while (len > 0) {
+        ssize_t n = recv(sock, buf, len, 0);
+        if (n <= 0) return -1;
+        buf += n;
+        len -= n;
+    }
+    return 0;
+}
+
+/* On TCP every batch is preceded by its length (2 bytes, little-endian). */
+static int send_batch(int sock, const unsigned char *msg, size_t len) {
+    unsigned char out[2 + MAX_PACKET_SIZE];
+    if (len > sizeof(out) - 2) return -1;
+    out[0] = len & 0xFF;
+    out[1] = (len >> 8) & 0xFF;
+    memcpy(out + 2, msg, len);
+    return send_all(sock, out, len + 2);
+}
+
+static int recv_batch(int sock, unsigned char *buf, size_t cap) {
+    unsigned char hdr[2];
+    if (recv_all(sock, hdr, 2) < 0) return -1;
+    size_t len = hdr[0] | (hdr[1] << 8);
+    if (len == 0 || len > cap || recv_all(sock, buf, len) < 0) return -1;
+    return (int)len;
+}
+
+static size_t encode_zint(unsigned char *buf, unsigned long long value) {
+    size_t i = 0;
+    while (value > 0x7F) {
+        buf[i++] = (unsigned char)((value & 0x7F) | 0x80);
+        value >>= 7;
+    }
+    buf[i++] = (unsigned char)(value & 0x7F);
+    return i;
+}
+
+static int decode_zint(const unsigned char *buf, size_t len, size_t *off, unsigned long long *value) {
+    *value = 0;
+    for (int shift = 0; *off < len && shift < 64; shift += 7) {
+        unsigned char b = buf[(*off)++];
+        *value |= (unsigned long long)(b & 0x7F) << shift;
+        if (!(b & 0x80)) return 0;
+    }
+    return -1;
+}
+
+/* InitSyn -> InitAck, OpenSyn(cookie) -> OpenAck: the router drops a link whose first message is not InitSyn. */
+static int open_session(int sock) {
+    unsigned char msg[2048], cookie[2048];
+    size_t off = 0;
+    unsigned long long cookie_len;
+    int len;
+
+    msg[off++] = Z_MSG_INIT;
+    msg[off++] = Z_PROTO_VERSION;
+    msg[off++] = ((Z_ZID_LEN - 1) << 4) | Z_WHATAMI_CLIENT;
+    for (int i = 0; i < Z_ZID_LEN; i++) msg[off++] = rand() & 0xFF;
+    msg[3] |= 0x01;  /* zid must not be zero */
+    if (send_batch(sock, msg, off) < 0) return -1;
+
+    len = recv_batch(sock, msg, sizeof(msg));
+    if (len < 3 || (msg[0] & 0x1F) != Z_MSG_INIT || !(msg[0] & Z_FLAG_A)) return -1;
+    off = 2;
+    off += 1 + (msg[2] >> 4) + 1;
+    if (msg[0] & Z_FLAG_S) off += 3;
+    if (decode_zint(msg, len, &off, &cookie_len) < 0 || off + cookie_len > (size_t)len) return -1;
+    memcpy(cookie, msg + off, cookie_len);
+
+    off = 0;
+    msg[off++] = Z_MSG_OPEN | Z_FLAG_T;
+    off += encode_zint(msg + off, 10);  /* lease, seconds */
+    off += encode_zint(msg + off, 0);   /* initial sn */
+    off += encode_zint(msg + off, cookie_len);
+    if (off + cookie_len > sizeof(msg)) return -1;
+    memcpy(msg + off, cookie, cookie_len);
+    off += cookie_len;
+    if (send_batch(sock, msg, off) < 0) return -1;
+
+    len = recv_batch(sock, msg, sizeof(msg));
+    if (len < 1 || (msg[0] & 0x1F) != Z_MSG_OPEN || !(msg[0] & Z_FLAG_A)) return -1;
+    return 0;
+}
+
+static int connect_session(struct sockaddr_in *target) {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) return -1;
+    struct timeval to = {1, 0};  /* a router that stops answering must not block the fuzzer */
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &to, sizeof(to));
+    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &to, sizeof(to));
+    if (connect(sock, (struct sockaddr*)target, sizeof(*target)) < 0 || open_session(sock) < 0) {
+        int e = errno;
+        close(sock);
+        errno = e;
+        return -1;
+    }
+    return sock;
 }
 
 void fuzz_random(unsigned char *buf, size_t *len) {
@@ -48,7 +169,7 @@ void fuzz_valid_header(unsigned char *buf, size_t *len) {
 }
 
 void fuzz_overflow(unsigned char *buf, size_t *len) {
-    buf[0] = 0x00; // FRAME
+    buf[0] = 0x05; // FRAME
     buf[1] = 0xFF; buf[2] = 0xFF; buf[3] = 0xFF; buf[4] = 0xFF; // Huge seq
     *len = MAX_PACKET_SIZE;
     memset(buf + 5, 0xAA, *len - 5);
@@ -70,7 +191,7 @@ void fuzz_injection(unsigned char *buf, size_t *len) {
         "\x90\x90\x90\x90\x90\x90\x90\x90" // NOP sled
     };
     
-    buf[0] = 0x00; // FRAME
+    buf[0] = 0x05; // FRAME
     buf[1] = 0x01; // Seq = 1
     
     const char *payload = payloads[rand() % 7];
@@ -91,7 +212,7 @@ const char* strategy_name(fuzz_strategy_t strategy) {
     }
 }
 
-void fuzz_test(int sock, struct sockaddr_in *target, fuzz_strategy_t strategy,
+void fuzz_test(struct sockaddr_in *target, fuzz_strategy_t strategy,
                unsigned long *total, unsigned long *crashes) {
     unsigned char buffer[MAX_PACKET_SIZE];
     size_t len;
@@ -105,10 +226,17 @@ void fuzz_test(int sock, struct sockaddr_in *target, fuzz_strategy_t strategy,
         default: fuzz_random(buffer, &len);
     }
     
-    ssize_t sent = sendto(sock, buffer, len, 0,
-                         (struct sockaddr*)target, sizeof(*target));
+    /* One session per case: the router drops the session after a message it cannot decode. */
+    errno = 0;
+    int sock = connect_session(target);
+    if (sock < 0) {
+        printf("[!] Session not opened (%s) - possible crash?\n",
+               errno ? strerror(errno) : "unexpected reply");
+        (*crashes)++;
+        return;
+    }
     
-    if (sent > 0) {
+    if (send_batch(sock, buffer, len) == 0) {
         (*total)++;
         
         // Try to receive response
@@ -119,17 +247,15 @@ void fuzz_test(int sock, struct sockaddr_in *target, fuzz_strategy_t strategy,
         
         if (select(sock + 1, &readfds, NULL, NULL, &tv) > 0) {
             unsigned char response[MAX_PACKET_SIZE];
-            ssize_t recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
+            ssize_t recv_len = recv(sock, response, sizeof(response), 0);
             
-            // Analyze response
-            if (recv_len == 0) {
-                printf("[!] Empty response - possible crash?\n");
-                (*crashes)++;
-            } else if (recv_len > 0 && (response[0] & 0x1F) == 0x06) {
+            // Analyze response: EOF/reset, or a CLOSE (0x03) after the 2-byte length
+            if (recv_len <= 0 || (recv_len >= 3 && (response[2] & 0x1F) == 0x03)) {
                 printf("[!] Connection closed by peer\n");
             }
         }
     }
+    close(sock);
 }
 
 int main(int argc, char *argv[]) {
@@ -153,12 +279,6 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_handler);
     srand(time(NULL));
     
-    int sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0) {
-        perror("[-] Socket creation failed");
-        return 1;
-    }
-    
     struct sockaddr_in target_addr = {0};
     target_addr.sin_family = AF_INET;
     target_addr.sin_port = htons(target_port);
@@ -172,7 +292,7 @@ int main(int argc, char *argv[]) {
     
     for (unsigned long i = 0; i < iterations && g_running; i++) {
         fuzz_strategy_t strategy = rand() % 6;
-        fuzz_test(sock, &target_addr, strategy, &total, &crashes);
+        fuzz_test(&target_addr, strategy, &total, &crashes);
         
         if ((i + 1) % 100 == 0) {
             printf("[*] Progress: %lu/%lu | Strategy: %-15s | Crashes: %lu\n",
@@ -181,8 +301,6 @@ int main(int argc, char *argv[]) {
         
         usleep(1000);
     }
-    
-    close(sock);
     
     time_t duration = time(NULL) - start;
     
