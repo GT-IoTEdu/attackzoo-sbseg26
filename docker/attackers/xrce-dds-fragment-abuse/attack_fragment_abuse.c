@@ -165,7 +165,7 @@ int main(int argc, char **argv)
     uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id, "", UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
-    const char *datawriter_xml = "";
+    const char *datawriter_xml = "<dds><data_writer><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></data_writer></dds>";
     uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id,
                                      datawriter_xml, UXR_REPLACE);
 
