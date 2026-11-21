@@ -60,7 +60,8 @@ AUTO_BPF_BY_ATTACK: Dict[str, str] = {
     # --iface any (the default) has no Ethernet header, so "ether dst" cannot compile; keep only non-IP frames.
     "net_cdp_table_flood": "not ip and not ip6 and not arp",
     "net_dhcp_starvation": "udp port 67 or udp port 68",
-    "net_ipv6_mld_flood": "icmp6",
+    # MLD carries a Hop-by-Hop header before ICMPv6, and "icmp6" alone does not skip it.
+    "net_ipv6_mld_flood": "icmp6 or (ip6[6] == 0 and ip6[40] == 58)",
     "net_ipv6_ns_flood": "icmp6 and ip6[40] == 135",
     "net_ipv6_ra_flood": "icmp6 and ip6[40] == 134",
     # On any (cooked v2) libpcap compiles "stp" as protocol == 0x42, which never matches a BPDU.
