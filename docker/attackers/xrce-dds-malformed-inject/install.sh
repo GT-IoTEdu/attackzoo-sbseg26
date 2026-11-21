@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 DEBIAN_FRONTEND=noninteractive
 cd /opt/
 git clone https://github.com/eProsima/Micro-CDR.git

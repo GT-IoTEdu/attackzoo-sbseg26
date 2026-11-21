@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 mkdir -p bin
 mkdir -p logs
 
@@ -13,10 +14,7 @@ SPECIAL_CFLAGS="-Wall -Wextra -O2"
 SPECIAL_LIBS="-lpthread"
 
 for attack in "${C_ATTACKS[@]}"; do
-    if [ -f "${attack}.c" ]; then
-        gcc ${attack}.c -o bin/$attack ${DDS_CFLAGS} ${DDS_LIBS}
-        if [ $? -eq 0 ]; then
-            chmod +x bin/$attack
-        fi
-    fi
+    gcc ${attack}.c -o bin/$attack ${DDS_CFLAGS} ${DDS_LIBS}
+    chmod +x bin/$attack
+    [ -x bin/$attack ] || { echo "ERROR: bin/$attack was not built" >&2; exit 1; }
 done
