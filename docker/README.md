@@ -99,6 +99,7 @@ The script builds all server, attacker, and client images. It also starts the st
 | [`servers/telnet-server/`](servers/telnet-server/) | `telnet-server` | `server-telnet-server:latest` | Serve as a target for Telnet brute force and simple benign login traffic. |
 | [`servers/xrce-dds-agent/`](servers/xrce-dds-agent/) | `xrce-dds-agent` | `server-xrce-dds-agent:latest` | Serve as an XRCE-DDS agent for IoT attacks involving discovery, entities, fragments, sessions, timing, and UDP DoS. |
 | [`servers/zenoh-router/`](servers/zenoh-router/) | `zenoh-router` | `server-zenoh-router:latest` | Serve as a Zenoh router for Zenoh-Pico attacks against fragmentation, keepalive, memory, fuzzing, sequence, and timestamp behavior. |
+| [`servers/zenoh-subscriber/`](servers/zenoh-subscriber/) | `zenoh-subscriber` | `server-zenoh-subscriber:latest` | Subscribe to `attackzoo/**` on the Zenoh router, so that the router forwards published samples to a receiver whose timestamps and order can be observed. Started on demand, not by `servers.sh` or `build-images.sh`. |
 
 ## Benign Clients
 
