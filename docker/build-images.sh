@@ -62,7 +62,7 @@ docker build -t server-mqtt-broker -f servers/mqtt-broker/Dockerfile .
 docker run -it -d --rm --name server-mqtt-broker -p 1883:1883 -p 9001:9001 server-mqtt-broker:latest
 wait
 docker build -t server-coap-server -f servers/coap-server/Dockerfile .
-docker run -d --rm --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
+docker run -d --restart on-failure --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
 wait
 chmod +x servers/xrce-dds-agent/agent-source-install.sh
 servers/xrce-dds-agent/agent-source-install.sh

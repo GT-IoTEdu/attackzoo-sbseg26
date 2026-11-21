@@ -19,7 +19,7 @@
 ## Execution
 
 ```bash
-docker run -d --rm --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
+docker run -d --restart on-failure --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
 ```
 
 ## Container IP

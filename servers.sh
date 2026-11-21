@@ -110,7 +110,7 @@ function START {
         docker run -d --rm --name server-mqtt-broker -p 1883:1883 -p 9001:9001 server-mqtt-broker:latest
     fi
     if PROFILE_INCLUDES server-coap-server && [ $( docker ps -a | grep -c 'server-coap-server') -eq 0 ]; then
-        docker run -d --rm --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
+        docker run -d --restart on-failure --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
     fi
     if PROFILE_INCLUDES server-xrce-dds-agent && [ $( docker ps -a | grep -c 'server-xrce-dds-agent') -eq 0 ]; then
         docker run -d --rm -p 8888:8888/udp --name server-xrce-dds-agent server-xrce-dds-agent:latest "udp4" "-p" "8888"
