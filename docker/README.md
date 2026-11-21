@@ -88,6 +88,7 @@ The script builds all server, attacker, and client images. It also starts the st
 
 | Directory | ID | Image | Purpose |
 |---|---|---|---|
+| [`servers/cdp-listener/`](servers/cdp-listener/) | `cdp-listener` | `server-cdp-listener:latest` | Keep a CDP neighbor table on the local network, the victim of CDP table flooding. |
 | [`servers/coap-server/`](servers/coap-server/) | `coap-server` | `server-coap-server:latest` | Serve as a target for CoAP GET requests, resource discovery, fuzzing, and token collisions. |
 | [`servers/dhcp-server/`](servers/dhcp-server/) | `dhcp-server` | `server-dhcp-server:latest` | Serve as the DHCP server of the local network, the victim of DHCP starvation. |
 | [`servers/http-server/`](servers/http-server/) | `http-server` | `server-http-server:latest` | Provide a vulnerable web application for web attacks, scanners, enumeration, and controlled HTTP DoS. |

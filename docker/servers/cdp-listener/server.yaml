@@ -1,0 +1,24 @@
+id: cdp-listener
+name: CDP Listener
+role: target-server
+image: server-cdp-listener:latest
+container_name: server-cdp-listener
+base_image: ubuntu:24.04
+service: lldpd in receive-only mode with CDP enabled, keeping a CDP neighbor table for eth0
+protocols:
+- cdp
+internal_ports: []
+published_ports: []
+startup: docker run -d --rm --name server-cdp-listener server-cdp-listener:latest
+logs: docker logs server-cdp-listener
+purpose: Keep a CDP neighbor table on the local network, the victim of CDP table flooding.
+observability:
+- CDP frames in PCAP
+- neighbor table with docker exec server-cdp-listener lldpcli show neighbors
+- counters with docker exec server-cdp-listener lldpcli show statistics
+related_attacks:
+- net_cdp_table_flood
+benign_clients: []
+notes:
+- Receive-only (lldpd -r); it sends no LLDP or CDP frames.
+- lldpd keeps at most 32 neighbors per port and protocol (max-neighbors); CDP entries expire after the TTL in the frame.

@@ -58,7 +58,7 @@ The artifact is intended to support the following review badges:
 | CLI parser and commands | `modules/attackzoo/` | Implementation of `status`, `list`, `run`, `stop`, `ps`, `logs`, `captures`, `features`, `dataset`, `experiment`, and `report`. |
 | Reviewer claim scripts | `run_claim1.sh`, `run_claim2.sh`, `run_claim3.sh`, `run_claim_figures.sh` | One-command checks for the reproducible experiment claims and published dataset validation. |
 | Dynamic attack catalog | `docker/attackers/*/attack.yaml` | Plug-and-play attack definitions loaded automatically by the tool. |
-| Target servers | `docker/servers/` | Docker images for HTTP, SSH, SMB, MQTT, CoAP, XRCE-DDS, Zenoh, Telnet, SSL/Heartbleed, and DHCP services. |
+| Target servers | `docker/servers/` | Docker images for HTTP, SSH, SMB, MQTT, CoAP, XRCE-DDS, Zenoh, Telnet, SSL/Heartbleed, DHCP, and CDP services. |
 | Benign clients | `docker/clients/` | Containers that generate benign background traffic. |
 | Web UI | `modules/attackzoo_st.py` | Streamlit interface for interactive use. |
 | Helper scripts | `setup.sh`, `build.sh`, `servers.sh`, `clients.sh`, `environment.sh` | Dependency installation, Docker image builds, server/client control, environment control and Streamlit optional Web UI. |
@@ -83,6 +83,7 @@ The complete catalog coverage, category counts, and MITRE ATT&CK mapping are mai
 | Telnet | `server-telnet-server` | `2323/tcp -> 23/tcp` |
 | SSL/Heartbleed | `server-ssl-heartbleed` | `8443/tcp -> 443/tcp` |
 | DHCP/udhcpd | `server-dhcp-server` | none (layer 2) |
+| CDP/lldpd | `server-cdp-listener` | none (layer 2) |
 
 >[!NOTE]
 >More details about [Safety and port isolation guidance](#safety-considerations).
@@ -238,7 +239,7 @@ _Logging out and back in also applies the group change._
 ### 3. Build the Docker Images Catalog and Start Servers
 
 Here we have 2 options:
-- A `Full Version`: (60 attackers, 10 servers, 2 client types and all dependencies); or
+- A `Full Version`: (60 attackers, 11 servers, 2 client types and all dependencies); or
 - A `Reduced Version`: (7 attackers, 3 servers and dependencies).
 
 #### \*\* Full Version Installation \*\*

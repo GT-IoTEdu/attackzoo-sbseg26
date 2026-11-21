@@ -30,6 +30,7 @@ ALL_SERVER_IMAGES=(
     server-telnet-server
     server-ssl-heartbleed
     server-dhcp-server
+    server-cdp-listener
 )
 
 REDUX_SERVER_IMAGES=(
@@ -127,6 +128,9 @@ function START {
     fi
     if PROFILE_INCLUDES server-dhcp-server && [ $( docker ps -a | grep -c 'server-dhcp-server') -eq 0 ]; then
         docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
+    fi
+    if PROFILE_INCLUDES server-cdp-listener && [ $( docker ps -a | grep -c 'server-cdp-listener') -eq 0 ]; then
+        docker run -d --rm --name server-cdp-listener server-cdp-listener:latest
     fi
 }
 

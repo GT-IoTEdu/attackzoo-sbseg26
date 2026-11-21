@@ -79,6 +79,9 @@ wait
 docker build -t server-dhcp-server -f servers/dhcp-server/Dockerfile .
 docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
 wait
+docker build -t server-cdp-listener -f servers/cdp-listener/Dockerfile .
+docker run -d --rm --name server-cdp-listener server-cdp-listener:latest
+wait
 docker build --no-cache -t attack-arp-scan -f attackers/arp-scan/Dockerfile .
 docker build --no-cache -t attack-arp-spoof -f attackers/arp-spoof/Dockerfile .
 docker build -t attack-cdp-table-flood -f attackers/cdp-table-flood/Dockerfile .
