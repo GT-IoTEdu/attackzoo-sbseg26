@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # lfienum (PoC) by 0bfxgh0st*
-import sys, requests, re, base64
+import sys, requests, re, base64, os
 from bs4 import BeautifulSoup
 
 ColGreenMark="\033[1;32m"
@@ -31,6 +31,8 @@ except IndexError:
 headers = {
   'User-Agent': '--'
 }
+if os.environ.get('LFI_COOKIE'):
+  headers['Cookie'] = os.environ['LFI_COOKIE']
 
 def CheckCon():
 
