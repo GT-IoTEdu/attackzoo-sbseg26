@@ -94,7 +94,15 @@ void hijack_session_and_inject(char* ip, char* port, uint32_t target_key) {
         .depth = 10
     };
     
-    const char* datawriter_xml = "";
+    const char* datawriter_xml = "<dds>"
+            "<data_writer>"
+            "<topic>"
+            "<kind>NO_KEY</kind>"
+            "<name>HelloWorldTopic</name>"
+            "<dataType>HelloWorld</dataType>"
+            "</topic>"
+            "</data_writer>"
+            "</dds>";
     uint16_t req4 = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, 
                                      publisher_id, datawriter_xml, UXR_REPLACE);
     
