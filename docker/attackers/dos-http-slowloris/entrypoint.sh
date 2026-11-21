@@ -9,7 +9,7 @@ if [ "${#}" -eq 2 ]; then
     DURATION_S="${DURATION_S:-0}"
     set -e
     if [ "${DURATION_S}" -gt 0 ]; then
-        exec timeout "${DURATION_S}" python3 /slowloris/slowloris.py "${TARGET}" -p "${PORT}"
+        timeout "${DURATION_S}" python3 /slowloris/slowloris.py "${TARGET}" -p "${PORT}"
     else
         exec python3 /slowloris/slowloris.py "${TARGET}" -p "${PORT}"
     fi
