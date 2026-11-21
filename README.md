@@ -539,6 +539,8 @@ To regenerate traffic figures from raw captures, run a local campaign that prese
 - [Reduced reviewer lab profile](contrib/docs/REDUX_LAB.md)
 - [Reproducibility notes](contrib/docs/REPRODUCIBILITY_NOTES.md)
 - [Troubleshooting](contrib/docs/TROUBLESHOOTING.md)
+- [Attack revalidation report](contrib/docs/ATTACK_REVALIDATION.md)
+- [Attack revalidation reproduction steps](contrib/docs/ATTACK_REVALIDATION_REPRODUCTION.md)
 
 ## License
 
