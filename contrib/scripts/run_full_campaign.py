@@ -57,7 +57,8 @@ DEFAULT_RESOURCE_INTERVAL_S = 1.0
 DEFAULT_IFACE = "any"
 
 AUTO_BPF_BY_ATTACK: Dict[str, str] = {
-    "net_cdp_table_flood": "ether dst 01:00:0c:cc:cc:cc",
+    # --iface any (the default) has no Ethernet header, so "ether dst" cannot compile; keep only non-IP frames.
+    "net_cdp_table_flood": "not ip and not ip6 and not arp",
     "net_dhcp_starvation": "udp port 67 or udp port 68",
     "net_ipv6_mld_flood": "icmp6",
     "net_ipv6_ns_flood": "icmp6 and ip6[40] == 135",
