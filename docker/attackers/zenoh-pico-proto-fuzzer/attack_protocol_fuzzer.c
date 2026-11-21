@@ -200,6 +200,37 @@ void fuzz_injection(unsigned char *buf, size_t *len) {
     *len = 2 + payload_len;
 }
 
+/* Valid message id, but one field contradicts the rest of the message. */
+void fuzz_malformed(unsigned char *buf, size_t *len) {
+    size_t n = 0, extra = rand() % 16;
+    switch (rand() % 4) {
+        case 0: // KEEP_ALIVE ext whose declared length exceeds the bytes that follow
+            buf[n++] = 0x84;                      // KEEP_ALIVE, Z: an extension follows
+            buf[n++] = 0x42;                      // ext id 2, ZBuf body
+            buf[n++] = extra + 1 + rand() % 100;  // declared length > extra
+            for (size_t i = 0; i < extra; i++) buf[n++] = rand() % 256;
+            break;
+        case 1: // FRAME sn as a zint longer than the 9-byte maximum
+            buf[n++] = 0x05;                      // FRAME
+            buf[n++] = 0x80 | (rand() % 128);
+            memset(buf + n, 0x80, 9);
+            n += 9;
+            buf[n++] = 0x00;
+            break;
+        case 2: // FRAME ext chain that announces one more extension and ends
+            buf[n++] = 0x85;                      // FRAME, Z
+            buf[n++] = rand() % 128;              // sn
+            for (size_t i = 0; i <= extra % 3; i++) buf[n++] = 0x80 | (2 + rand() % 14);  // unit ext, Z set
+            break;
+        default: // FRAME ext with the reserved body encoding 0b11
+            buf[n++] = 0x85;                      // FRAME, Z
+            buf[n++] = rand() % 128;              // sn
+            buf[n++] = 0x60 | (rand() % 16);
+            for (size_t i = 0; i < extra; i++) buf[n++] = rand() % 256;
+    }
+    *len = n;
+}
+
 const char* strategy_name(fuzz_strategy_t strategy) {
     switch (strategy) {
         case FUZZ_RANDOM: return "Random";
@@ -220,6 +251,7 @@ void fuzz_test(struct sockaddr_in *target, fuzz_strategy_t strategy,
     switch (strategy) {
         case FUZZ_RANDOM: fuzz_random(buffer, &len); break;
         case FUZZ_VALID_HEADER: fuzz_valid_header(buffer, &len); break;
+        case FUZZ_MALFORMED: fuzz_malformed(buffer, &len); break;
         case FUZZ_OVERFLOW: fuzz_overflow(buffer, &len); break;
         case FUZZ_UNDERFLOW: fuzz_underflow(buffer, &len); break;
         case FUZZ_INJECTION: fuzz_injection(buffer, &len); break;
