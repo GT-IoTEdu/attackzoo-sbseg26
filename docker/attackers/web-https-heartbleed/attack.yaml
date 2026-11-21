@@ -7,7 +7,7 @@ image: attack-web-https-heartbleed:latest
 container_name: attack-web-https-heartbleed
 max_runtime_s: 10
 target_services:
-- http-server
+- ssl-heartbleed
 target_mapping:
   target: target_ip
   port: target_port

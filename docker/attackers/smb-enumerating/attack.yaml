@@ -7,7 +7,7 @@ image: attack-smb-enumerating:latest
 container_name: attack-smb-enumerating
 max_runtime_s: 10
 target_services:
-- target IP service
+- smb-server
 target_mapping:
   target: target_ip
 mitre:
