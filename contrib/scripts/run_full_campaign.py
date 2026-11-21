@@ -63,8 +63,9 @@ AUTO_BPF_BY_ATTACK: Dict[str, str] = {
     "net_ipv6_mld_flood": "icmp6",
     "net_ipv6_ns_flood": "icmp6 and ip6[40] == 135",
     "net_ipv6_ra_flood": "icmp6 and ip6[40] == 134",
-    "net_stp_conf_flood": "stp or port 8080",
-    "net_stp_tcn_flood": "stp or port 8080",
+    # On any (cooked v2) libpcap compiles "stp" as protocol == 0x42, which never matches a BPDU.
+    "net_stp_conf_flood": "(not ip and not ip6 and not arp) or port 8080",
+    "net_stp_tcn_flood": "(not ip and not ip6 and not arp) or port 8080",
 }
 
 SERVICE_OVERRIDES: Dict[str, str] = {
