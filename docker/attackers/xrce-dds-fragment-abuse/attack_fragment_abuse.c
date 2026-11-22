@@ -10,13 +10,20 @@
 #define SMALL_BUFFER_SIZE 256 * STREAM_HISTORY
 #define HUGE_MESSAGE_SIZE 32000
 
+bool flush_session(uxrSession *session, void *args)
+{
+    (void) args;
+    return uxr_run_session_until_confirm_delivery(session, 1000);
+}
+
 void send_incomplete_fragments(uxrSession *session, uxrStreamId stream, uxrObjectId datawriter)
 {
     printf("[*] Sending incomplete fragments...\n");
 
     ucdrBuffer mb;
 
-    uint16_t req_id = uxr_prepare_output_stream(session, stream, datawriter, &mb, HUGE_MESSAGE_SIZE);
+    uint16_t req_id = uxr_prepare_output_stream_fragmented(session, stream, datawriter, &mb, HUGE_MESSAGE_SIZE,
+                                                           flush_session, NULL);
 
     if (req_id != UXR_INVALID_REQUEST_ID)
     {
@@ -38,17 +45,24 @@ void send_overlapping_fragments(uxrSession *session, uxrStreamId stream, uxrObje
         ucdrBuffer mb;
         uint32_t size = HUGE_MESSAGE_SIZE / 2;
 
-        uint16_t req_id = uxr_prepare_output_stream(session, stream, datawriter, &mb, size);
+        uint16_t req_id = uxr_prepare_output_stream_fragmented(session, stream, datawriter, &mb, size,
+                                                               flush_session, NULL);
 
         if (req_id != UXR_INVALID_REQUEST_ID)
         {
             char msg[100];
             snprintf(msg, sizeof(msg), "OVERLAPPING_FRAGMENT_%d", i);
 
+            uint8_t data[HUGE_MESSAGE_SIZE / 2] = {0};
+            ucdrBuffer db;
+            ucdr_init_buffer(&db, data, size);
+
             for (int j = 0; j < 200; j++)
             {
-                ucdr_serialize_string(&mb, msg);
+                ucdr_serialize_string(&db, msg);
             }
+
+            ucdr_serialize_array_uint8_t(&mb, data, size);
 
             if (i % 3 == 0)
             {
@@ -69,17 +83,24 @@ void flood_with_fragments(uxrSession *session, uxrStreamId stream, uxrObjectId d
         ucdrBuffer mb;
         uint32_t size = HUGE_MESSAGE_SIZE / 4;
 
-        uint16_t req_id = uxr_prepare_output_stream(session, stream, datawriter, &mb, size);
+        uint16_t req_id = uxr_prepare_output_stream_fragmented(session, stream, datawriter, &mb, size,
+                                                               flush_session, NULL);
 
         if (req_id != UXR_INVALID_REQUEST_ID)
         {
             char msg[100];
             snprintf(msg, sizeof(msg), "FLOOD_MESSAGE_%d", i);
 
+            uint8_t data[HUGE_MESSAGE_SIZE / 4] = {0};
+            ucdrBuffer db;
+            ucdr_init_buffer(&db, data, size);
+
             for (int j = 0; j < 100; j++)
             {
-                ucdr_serialize_string(&mb, msg);
+                ucdr_serialize_string(&db, msg);
             }
+
+            ucdr_serialize_array_uint8_t(&mb, data, size);
         }
 
         if (i % 10 == 0)
@@ -144,7 +165,7 @@ int main(int argc, char **argv)
     uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id, "", UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
-    const char *datawriter_xml = "";
+    const char *datawriter_xml = "<dds><data_writer><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></data_writer></dds>";
     uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id,
                                      datawriter_xml, UXR_REPLACE);
 

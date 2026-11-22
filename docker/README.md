@@ -88,7 +88,9 @@ The script builds all server, attacker, and client images. It also starts the st
 
 | Directory | ID | Image | Purpose |
 |---|---|---|---|
+| [`servers/cdp-listener/`](servers/cdp-listener/) | `cdp-listener` | `server-cdp-listener:latest` | Keep a CDP neighbor table on the local network, the victim of CDP table flooding. |
 | [`servers/coap-server/`](servers/coap-server/) | `coap-server` | `server-coap-server:latest` | Serve as a target for CoAP GET requests, resource discovery, fuzzing, and token collisions. |
+| [`servers/dhcp-server/`](servers/dhcp-server/) | `dhcp-server` | `server-dhcp-server:latest` | Serve as the DHCP server of the local network, the victim of DHCP starvation. |
 | [`servers/http-server/`](servers/http-server/) | `http-server` | `server-http-server:latest` | Provide a vulnerable web application for web attacks, scanners, enumeration, and controlled HTTP DoS. |
 | [`servers/mqtt-broker/`](servers/mqtt-broker/) | `mqtt-broker` | `server-mqtt-broker:latest` | Act as an MQTT broker for publishing, brute force, LWT abuse, and QoS amplification in IoT experiments. |
 | [`servers/smb-server/`](servers/smb-server/) | `smb-server` | `server-smb-server:latest` | Provide an SMB/Samba share for enumeration and benign share-listing traffic. |
@@ -97,6 +99,7 @@ The script builds all server, attacker, and client images. It also starts the st
 | [`servers/telnet-server/`](servers/telnet-server/) | `telnet-server` | `server-telnet-server:latest` | Serve as a target for Telnet brute force and simple benign login traffic. |
 | [`servers/xrce-dds-agent/`](servers/xrce-dds-agent/) | `xrce-dds-agent` | `server-xrce-dds-agent:latest` | Serve as an XRCE-DDS agent for IoT attacks involving discovery, entities, fragments, sessions, timing, and UDP DoS. |
 | [`servers/zenoh-router/`](servers/zenoh-router/) | `zenoh-router` | `server-zenoh-router:latest` | Serve as a Zenoh router for Zenoh-Pico attacks against fragmentation, keepalive, memory, fuzzing, sequence, and timestamp behavior. |
+| [`servers/zenoh-subscriber/`](servers/zenoh-subscriber/) | `zenoh-subscriber` | `server-zenoh-subscriber:latest` | Subscribe to `attackzoo/**` on the Zenoh router, so that the router forwards published samples to a receiver whose timestamps and order can be observed. Started on demand, not by `servers.sh` or `build-images.sh`. |
 
 ## Benign Clients
 
@@ -104,6 +107,7 @@ The script builds all server, attacker, and client images. It also starts the st
 |---|---|---|---|
 | [`clients/client-random/`](clients/client-random/) | `client-random` | `client-random:latest` | Generate continuous benign noise during experiments by randomly choosing among supported protocol clients. |
 | [`clients/client-super/`](clients/client-super/) | `client-super` | `client-super:latest` | Generate controlled benign traffic with count, interval, and duration defined by parameters. |
+| [`clients/client-xrce-dds/`](clients/client-xrce-dds/) | `client-xrce-dds` | `client-xrce-dds:latest` | Generate legitimate XRCE-DDS traffic (session, entity creation, reliable writes) that the XRCE-DDS attacks can act on. Built and started on demand, not by `build-images.sh` or `clients.sh`. |
 
 From the repository root, use `clients.sh` to control client containers:
 

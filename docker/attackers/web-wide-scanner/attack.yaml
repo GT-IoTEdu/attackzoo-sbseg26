@@ -24,7 +24,7 @@ params:
   kind: ip
   placeholder: __HOST_IP__
 - key: target_port
-  label: Target port
+  label: Target port (ignored by the scan; sfp_portscan_tcp uses its default port list)
   kind: port
   placeholder: '8080'
   default: 8080

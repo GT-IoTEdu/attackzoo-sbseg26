@@ -63,4 +63,7 @@ VOLUME ["/etc", "/var/cache/samba", "/var/lib/samba", "/var/log/samba",\
             "/run/samba"]
 RUN chmod +x /usr/bin/samba.sh
 
+# samba.sh starts nmbd (NetBIOS 137/138 udp) only when NMBD is set (same as -n)
+ENV NMBD=true
+
 ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/samba.sh"]

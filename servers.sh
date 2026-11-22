@@ -29,6 +29,8 @@ ALL_SERVER_IMAGES=(
     server-zenoh-router
     server-telnet-server
     server-ssl-heartbleed
+    server-dhcp-server
+    server-cdp-listener
 )
 
 REDUX_SERVER_IMAGES=(
@@ -110,7 +112,7 @@ function START {
         docker run -d --rm --name server-mqtt-broker -p 1883:1883 -p 9001:9001 server-mqtt-broker:latest
     fi
     if PROFILE_INCLUDES server-coap-server && [ $( docker ps -a | grep -c 'server-coap-server') -eq 0 ]; then
-        docker run -d --rm --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
+        docker run -d --restart on-failure --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
     fi
     if PROFILE_INCLUDES server-xrce-dds-agent && [ $( docker ps -a | grep -c 'server-xrce-dds-agent') -eq 0 ]; then
         docker run -d --rm -p 8888:8888/udp --name server-xrce-dds-agent server-xrce-dds-agent:latest "udp4" "-p" "8888"
@@ -123,6 +125,12 @@ function START {
     fi
     if PROFILE_INCLUDES server-ssl-heartbleed && [ $( docker ps -a | grep -c 'server-ssl-heartbleed') -eq 0 ]; then
         docker run -d --rm --name server-ssl-heartbleed -p 8443:443 server-ssl-heartbleed:latest
+    fi
+    if PROFILE_INCLUDES server-dhcp-server && [ $( docker ps -a | grep -c 'server-dhcp-server') -eq 0 ]; then
+        docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
+    fi
+    if PROFILE_INCLUDES server-cdp-listener && [ $( docker ps -a | grep -c 'server-cdp-listener') -eq 0 ]; then
+        docker run -d --rm --name server-cdp-listener server-cdp-listener:latest
     fi
 }
 

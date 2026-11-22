@@ -20,7 +20,7 @@
 | Parameter | Type | Required | Default/placeholder | Description |
 |---|---|---|---|---|
 | `--target_ip` | `ip` | yes | `__HOST_IP__` | Target IP address or FQDN |
-| `--target_port` | `port` | no | `8080` | Target port |
+| `--target_port` | `port` | no | `8080` | Target port (ignored by the scan; sfp_portscan_tcp uses its default port list) |
 
 ## Capture Warning
 

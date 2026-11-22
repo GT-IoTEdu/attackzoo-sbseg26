@@ -38,6 +38,6 @@ The full raw campaign is intentionally not versioned in Git because it is too la
 
 ## Dependency Provenance
 
-Python dependencies are pinned in `requirements.txt`. Docker base images that previously used mutable `latest` references are pinned by digest. NTLFlowLyzer is installed from the upstream Git repository at commit `86d0102466ea42ba03ddda5c649ac7e533fb25d9` by default; override `NTLFLOWLYZER_REF` only when intentionally testing another revision.
+Python dependencies are pinned in `requirements.txt`. Docker base images that previously used mutable `latest` references are pinned by digest. NTLFlowLyzer is installed from the upstream Git repository at commit `d99cd5377faaed53b39450ce262652902501188d` by default; override `NTLFLOWLYZER_REF` only when intentionally testing another revision.
 
 Local validation after the artifact cleanup used Ubuntu 24.04.4 LTS, Linux `6.8.0-134-generic`, Python `3.12.3`, and Docker Engine `29.6.1`. The setup accepts Docker Engine `27.0` or newer.

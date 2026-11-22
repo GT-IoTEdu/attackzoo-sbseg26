@@ -62,7 +62,7 @@ docker build -t server-mqtt-broker -f servers/mqtt-broker/Dockerfile .
 docker run -it -d --rm --name server-mqtt-broker -p 1883:1883 -p 9001:9001 server-mqtt-broker:latest
 wait
 docker build -t server-coap-server -f servers/coap-server/Dockerfile .
-docker run -d --rm --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
+docker run -d --restart on-failure --name server-coap-server -p 5683:5683 -p 5683:5683/udp server-coap-server:latest
 wait
 chmod +x servers/xrce-dds-agent/agent-source-install.sh
 servers/xrce-dds-agent/agent-source-install.sh
@@ -75,6 +75,12 @@ docker run -d --rm --name server-telnet-server -p 2323:23 server-telnet-server:l
 wait
 docker build --no-cache -t server-ssl-heartbleed -f servers/ssl-heartbleed/Dockerfile .
 docker run -d --rm --name server-ssl-heartbleed -p 8443:443 server-ssl-heartbleed:latest
+wait
+docker build -t server-dhcp-server -f servers/dhcp-server/Dockerfile .
+docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
+wait
+docker build -t server-cdp-listener -f servers/cdp-listener/Dockerfile .
+docker run -d --rm --name server-cdp-listener server-cdp-listener:latest
 wait
 docker build --no-cache -t attack-arp-scan -f attackers/arp-scan/Dockerfile .
 docker build --no-cache -t attack-arp-spoof -f attackers/arp-spoof/Dockerfile .

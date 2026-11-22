@@ -14,7 +14,7 @@ if [ "${#}" -ge 1 ]; then
         --payload-size "${PAYLOAD_SIZE}"
 
     if [ "${DURATION_S}" -gt 0 ]; then
-        exec timeout "${DURATION_S}" "$@"
+        timeout "${DURATION_S}" "$@"
     else
         exec "$@"
     fi

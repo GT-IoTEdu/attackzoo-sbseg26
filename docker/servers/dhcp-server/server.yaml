@@ -1,0 +1,25 @@
+id: dhcp-server
+name: DHCP Server
+role: target-server
+image: server-dhcp-server:latest
+container_name: server-dhcp-server
+base_image: ubuntu:24.04
+service: busybox udhcpd serving a 10-address pool on the container network
+protocols:
+- dhcp
+internal_ports:
+- 67/udp
+published_ports: []
+startup: docker run -d --rm --name server-dhcp-server server-dhcp-server:latest
+logs: docker logs server-dhcp-server
+purpose: Serve as the DHCP server of the local network, the victim of DHCP starvation.
+observability:
+- DHCP DISCOVER/OFFER/ACK traffic in PCAP
+- OFFER and "no free IP addresses" messages on stdout
+- a client that gets (or does not get) a lease, e.g. busybox udhcpc -n -q
+related_attacks:
+- net_dhcp_starvation
+benign_clients: []
+notes:
+- No published port; DHCP works only on the layer-2 segment of the container (docker0).
+- The pool is .240-.249 of the container's /24 block; override with POOL_START and POOL_END.

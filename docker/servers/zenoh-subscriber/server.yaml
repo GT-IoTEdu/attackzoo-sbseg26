@@ -1,0 +1,24 @@
+id: zenoh-subscriber
+name: Zenoh Subscriber
+role: target-server
+image: server-zenoh-subscriber:latest
+container_name: server-zenoh-subscriber
+base_image: python:3.11-slim
+service: Eclipse Zenoh 1.7.2 subscriber (zenoh-python client of server-zenoh-router) on attackzoo/**
+protocols:
+- zenoh
+- tcp
+internal_ports: []
+published_ports: []
+startup: docker run -d --rm --name server-zenoh-subscriber server-zenoh-subscriber:latest $(docker container inspect server-zenoh-router --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+logs: docker logs server-zenoh-subscriber
+purpose: Subscribe to attackzoo/** on the Zenoh router, so that the router forwards published samples to a receiver whose timestamps and order can be observed.
+observability:
+- one stdout line per received sample (receive order and time, key, sample timestamp, payload size)
+- Zenoh TCP/7447 session with the router in PCAP
+related_attacks:
+- iot_zenoh_pico_timestamp_mess
+benign_clients: []
+notes:
+- Not started by servers.sh or build-images.sh; start it on demand, after server-zenoh-router.
+- While idle it keeps one Zenoh session with the router, with one KEEP_ALIVE each way every 2.5 s.

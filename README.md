@@ -58,7 +58,7 @@ The artifact is intended to support the following review badges:
 | CLI parser and commands | `modules/attackzoo/` | Implementation of `status`, `list`, `run`, `stop`, `ps`, `logs`, `captures`, `features`, `dataset`, `experiment`, and `report`. |
 | Reviewer claim scripts | `run_claim1.sh`, `run_claim2.sh`, `run_claim3.sh`, `run_claim_figures.sh` | One-command checks for the reproducible experiment claims and published dataset validation. |
 | Dynamic attack catalog | `docker/attackers/*/attack.yaml` | Plug-and-play attack definitions loaded automatically by the tool. |
-| Target servers | `docker/servers/` | Docker images for HTTP, SSH, SMB, MQTT, CoAP, XRCE-DDS, Zenoh, Telnet, and SSL/Heartbleed services. |
+| Target servers | `docker/servers/` | Docker images for HTTP, SSH, SMB, MQTT, CoAP, XRCE-DDS, Zenoh, Telnet, SSL/Heartbleed, DHCP, and CDP services. |
 | Benign clients | `docker/clients/` | Containers that generate benign background traffic. |
 | Web UI | `modules/attackzoo_st.py` | Streamlit interface for interactive use. |
 | Helper scripts | `setup.sh`, `build.sh`, `servers.sh`, `clients.sh`, `environment.sh` | Dependency installation, Docker image builds, server/client control, environment control and Streamlit optional Web UI. |
@@ -82,6 +82,8 @@ The complete catalog coverage, category counts, and MITRE ATT&CK mapping are mai
 | Zenoh Router | `server-zenoh-router` | `7447/tcp` |
 | Telnet | `server-telnet-server` | `2323/tcp -> 23/tcp` |
 | SSL/Heartbleed | `server-ssl-heartbleed` | `8443/tcp -> 443/tcp` |
+| DHCP/udhcpd | `server-dhcp-server` | none (layer 2) |
+| CDP/lldpd | `server-cdp-listener` | none (layer 2) |
 
 >[!NOTE]
 >More details about [Safety and port isolation guidance](#safety-considerations).
@@ -145,7 +147,7 @@ Tested package versions on Ubuntu 24.04.4 LTS:
 >[!CAUTION]
 >Please note that **this repository depends** on `Docker Engine` being installed as described in the [official documentation](https://docs.docker.com/engine/install/ubuntu/) and also on the [post-installation instructions for Linux](https://docs.docker.com/engine/install/linux-postinstall). Be advised that installation via `apt install` **might not be compatible**.
 
-The script also adds the current user to the `docker` group, configures capture permissions for `tcpdump`, creates `.venv/`, installs Python dependencies, and installs NTLFlowLyzer Project directly from its GitHub repository at commit `86d0102466ea42ba03ddda5c649ac7e533fb25d9` by default.
+The script also adds the current user to the `docker` group, configures capture permissions for `tcpdump`, creates `.venv/`, installs Python dependencies, and installs NTLFlowLyzer Project directly from its GitHub repository at commit `d99cd5377faaed53b39450ce262652902501188d` by default.
 
 ### Python Dependencies
 
@@ -168,7 +170,7 @@ The validated `.venv` also contains `NTLFlowLyzer==0.1.0`; `setup.sh` installs i
 - The official Docker repository for Ubuntu.
 - Operating-system package indexes.
 - PyPI for Python packages.
-- `https://github.com/ahlashkari/NTLFlowLyzer.git` at commit `86d0102466ea42ba03ddda5c649ac7e533fb25d9`.
+- `https://github.com/ahlashkari/NTLFlowLyzer.git` at commit `d99cd5377faaed53b39450ce262652902501188d`.
 - Base images and packages referenced by Dockerfiles under `docker/`.
 - Dozzle (`docker.io/amir20/dozzle`, pinned by digest) for the optional full-profile container log viewer.
 
@@ -237,7 +239,7 @@ _Logging out and back in also applies the group change._
 ### 3. Build the Docker Images Catalog and Start Servers
 
 Here we have 2 options:
-- A `Full Version`: (60 attackers, 9 servers, 2 client types and all dependencies); or
+- A `Full Version`: (60 attackers, 11 servers, 2 client types and all dependencies); or
 - A `Reduced Version`: (7 attackers, 3 servers and dependencies).
 
 #### \*\* Full Version Installation \*\*
@@ -539,6 +541,8 @@ To regenerate traffic figures from raw captures, run a local campaign that prese
 - [Reduced reviewer lab profile](contrib/docs/REDUX_LAB.md)
 - [Reproducibility notes](contrib/docs/REPRODUCIBILITY_NOTES.md)
 - [Troubleshooting](contrib/docs/TROUBLESHOOTING.md)
+- [Attack revalidation report](contrib/docs/ATTACK_REVALIDATION.md)
+- [Attack revalidation reproduction steps](contrib/docs/ATTACK_REVALIDATION_REPRODUCTION.md)
 
 ## License
 

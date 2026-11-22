@@ -7,7 +7,7 @@ cd "${ROOT_DIR}"
 
 PROFILE="${1:-}"
 SETUP_MARKER="${ROOT_DIR}/.attackzoo-setup.ok"
-NTLFLOWLYZER_REF="${NTLFLOWLYZER_REF:-86d0102466ea42ba03ddda5c649ac7e533fb25d9}"
+NTLFLOWLYZER_REF="${NTLFLOWLYZER_REF:-d99cd5377faaed53b39450ce262652902501188d}"
 
 case "${PROFILE}" in
     full|redux|dependencies)
